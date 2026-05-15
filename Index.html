@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard CSM — Primaa</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F5F4F0;
+  --surface: #FFFFFF;
+  --surface2: #EDECEA;
+  --border: #E0DED9;
+  --text: #1A1916;
+  --text2: #6B6860;
+  --text3: #A09E99;
+  --green: #1A7A52;
+  --green-bg: #E6F5EE;
+  --blue: #1854A0;
+  --blue-bg: #E8F0FB;
+  --amber: #8A5500;
+  --amber-bg: #FEF3DC;
+  --red: #9A2424;
+  --red-bg: #FDEBEB;
+  --purple: #4A38A0;
+  --purple-bg: #EEEDFB;
+  --pink: #8A2455;
+  --pink-bg: #FCEAF2;
+  --accent: #1A1916;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 28px 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar-logo {
+  padding: 0 20px 24px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+
+.logo-tag {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 4px;
+}
+
+.logo-name {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.nav-section {
+  padding: 0 12px;
+  margin-bottom: 8px;
+}
+
+.nav-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  padding: 0 8px;
+  margin-bottom: 4px;
+  margin-top: 16px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--text2);
+  font-size: 13px;
+  transition: all 0.15s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.nav-item:hover { background: var(--bg); color: var(--text); }
+.nav-item.active { background: var(--bg); color: var(--text); font-weight: 500; }
+
+.nav-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+.main {
+  padding: 32px 36px;
+  max-width: 1100px;
+}
+
+.page { display: none; }
+.page.active { display: block; }
+
+.page-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.refresh-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text2);
+  font-size: 12px;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.refresh-btn:hover { background: var(--bg); color: var(--text); }
+.refresh-btn.loading { opacity: 0.6; pointer-events: none; }
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.metric {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+}
+
+.metric-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 8px;
+}
+
+.metric-value {
+  font-size: 28px;
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+}
+
+.metric-sub {
+  font-size: 12px;
+  color: var(--text3);
+  margin-top: 4px;
+}
+
+.alerts { margin-bottom: 20px; }
+
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.alert-warn {
+  background: var(--amber-bg);
+  color: var(--amber);
+  border: 1px solid #F5D98A;
+}
+
+.alert-info {
+  background: var(--blue-bg);
+  color: var(--blue);
+  border: 1px solid #A8C4F0;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+
+.filters {
+  display: flex;
+  gap: 6px;
+}
+
+.filter-btn {
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text2);
+  font-size: 12px;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.filter-btn:hover { border-color: var(--text3); color: var(--text); }
+.filter-btn.active { background: var(--text); color: white; border-color: var(--text); }
+
+.table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text3);
+  text-align: left;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--bg); }
+
+.badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.badge-en-cours { background: var(--green-bg); color: var(--green); }
+.badge-a-venir { background: var(--blue-bg); color: var(--blue); }
+.badge-standby { background: var(--amber-bg); color: var(--amber); }
+.badge-breast { background: var(--pink-bg); color: var(--pink); }
+.badge-skin { background: var(--purple-bg); color: var(--purple); }
+
+.health-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.dot-green { background: var(--green); }
+.dot-amber { background: #D4870A; }
+.dot-red { background: #C43434; }
+.dot-gray { background: var(--text3); }
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+}
+
+.card-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rdv-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.rdv-item:last-of-type { border-bottom: none; }
+
+.rdv-name { font-size: 13px; font-weight: 500; }
+.rdv-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.rdv-date { font-size: 12px; color: var(--text2); text-align: right; }
+.rdv-days { font-size: 11px; color: var(--text3); }
+
+.obj-item { margin-bottom: 14px; }
+.obj-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text2);
+  margin-bottom: 6px;
+}
+.obj-val { font-weight: 500; color: var(--text); }
+
+.progress-bar {
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.6s ease;
+}
+
+.empty {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--text3);
+  font-size: 13px;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 48px;
+  color: var(--text3);
+  font-size: 13px;
+}
+
+.spinner {
+  display: inline-block;
+  width: 16px; height: 16px;
+  border: 2px solid var(--border);
+  border-top-color: var(--text2);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.last-update {
+  font-size: 11px;
+  color: var(--text3);
+  font-family: 'DM Mono', monospace;
+}
+
+.score-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.score-track {
+  flex: 1;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.score-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--green);
+}
+
+.score-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--text2);
+  min-width: 28px;
+  text-align: right;
+}
+
+.perm-note {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 12px;
+  color: var(--text2);
+  margin-top: 12px;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .metrics { grid-template-columns: repeat(2, 1fr); }
+  .grid2 { grid-template-columns: 1fr; }
+  .main { padding: 20px 16px; }
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-tag">Primaa</div>
+      <div class="logo-name">CSM Dashboard</div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Vues</div>
+      <button class="nav-item active" onclick="showPage('vue-ensemble')">
+        <span class="nav-dot" style="background:#1A7A52"></span> Vue d'ensemble
+      </button>
+      <button class="nav-item" onclick="showPage('labos')">
+        <span class="nav-dot" style="background:#1854A0"></span> Labos
+      </button>
+      <button class="nav-item" onclick="showPage('pathologistes')">
+        <span class="nav-dot" style="background:#4A38A0"></span> Pathologistes
+      </button>
+      <button class="nav-item" onclick="showPage('rdv')">
+        <span class="nav-dot" style="background:#8A5500"></span> Points de suivi
+      </button>
+      <div class="nav-label">Objectifs</div>
+      <button class="nav-item" onclick="showPage('objectifs')">
+        <span class="nav-dot" style="background:#8A2455"></span> Mes objectifs 2026
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- VUE ENSEMBLE -->
+    <div class="page active" id="page-vue-ensemble">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Vue d'ensemble</div>
+          <div class="last-update" id="last-update-label">—</div>
+        </div>
+        <button class="refresh-btn" id="refresh-btn" onclick="loadAll()">
+          <span id="refresh-icon">↻</span> Actualiser
+        </button>
+      </div>
+
+      <div class="metrics" id="metrics-top">
+        <div class="metric"><div class="metric-label">Labos actifs</div><div class="metric-value" id="m-actifs">—</div><div class="metric-sub">En cours</div></div>
+        <div class="metric"><div class="metric-label">À venir</div><div class="metric-value" id="m-avenir">—</div><div class="metric-sub">À onboarder</div></div>
+        <div class="metric"><div class="metric-label">Standby</div><div class="metric-value" id="m-standby">—</div><div class="metric-sub">À surveiller</div></div>
+        <div class="metric"><div class="metric-label">Pathologistes</div><div class="metric-value" id="m-patho">—</div><div class="metric-sub">Suivis actifs</div></div>
+      </div>
+
+      <div class="alerts" id="alerts-container"></div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="card-title">📅 Prochains RDV</div>
+          <div id="rdv-card">
+            <div class="loading-state"><span class="spinner"></span> Chargement…</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">🎯 Objectifs 2026</div>
+          <div class="obj-item">
+            <div class="obj-label"><span>Ambassadeurs</span><span class="obj-val" id="obj-amb">0 / 2</span></div>
+            <div class="progress-bar"><div class="progress-fill" id="prog-amb" style="width:0%;background:var(--green)"></div></div>
+          </div>
+          <div class="obj-item">
+            <div class="obj-label"><span>Rétention labos actifs</span><span class="obj-val">obj. 90%</span></div>
+            <div class="progress-bar"><div class="progress-fill" id="prog-ret" style="width:0%;background:var(--blue)"></div></div>
+          </div>
+          <div class="obj-item">
+            <div class="obj-label"><span>Score satisfaction CSM</span><span class="obj-val" id="obj-score">— / 10</span></div>
+            <div class="progress-bar"><div class="progress-fill" id="prog-score" style="width:0%;background:var(--purple)"></div></div>
+          </div>
+          <div class="perm-note">
+            Les scores se mettent à jour dès que tu renseignes les champs dans Notion (Score confiance, Score confort).
+          </div>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <div class="section-title">Tous les labos</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Labo</th>
+              <th>Ville</th>
+              <th>Produit</th>
+              <th>Déploiement</th>
+              <th>Statut</th>
+              <th>Santé</th>
+            </tr>
+          </thead>
+          <tbody id="labos-table-home">
+            <tr><td colspan="6"><div class="loading-state"><span class="spinner"></span> Chargement depuis Notion…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- LABOS -->
+    <div class="page" id="page-labos">
+      <div class="page-header">
+        <div class="page-title">Labos</div>
+        <div class="filters">
+          <button class="filter-btn active" onclick="filterLabos(this,'tous')">Tous</button>
+          <button class="filter-btn" onclick="filterLabos(this,'En cours')">En cours</button>
+          <button class="filter-btn" onclick="filterLabos(this,'À venir')">À venir</button>
+          <button class="filter-btn" onclick="filterLabos(this,'Standby')">Standby</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Labo</th>
+              <th>Ville</th>
+              <th>Produit</th>
+              <th>Déploiement</th>
+              <th>Statut</th>
+              <th>Santé</th>
+            </tr>
+          </thead>
+          <tbody id="labos-table-full">
+            <tr><td colspan="6"><div class="loading-state"><span class="spinner"></span> Chargement…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PATHOLOGISTES -->
+    <div class="page" id="page-pathologistes">
+      <div class="page-header">
+        <div class="page-title">Pathologistes</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Labo</th>
+              <th>Produit</th>
+              <th>Fréquence RDV</th>
+              <th>Prochain RDV</th>
+              <th>Confiance</th>
+              <th>Confort</th>
+            </tr>
+          </thead>
+          <tbody id="patho-table">
+            <tr><td colspan="7"><div class="loading-state"><span class="spinner"></span> Chargement…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- POINTS DE SUIVI -->
+    <div class="page" id="page-rdv">
+      <div class="page-header">
+        <div class="page-title">Points de suivi</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Point de suivi</th>
+              <th>Date</th>
+              <th>Pathologiste</th>
+              <th>Labo</th>
+              <th>Confiance diag.</th>
+              <th>Confort diag.</th>
+            </tr>
+          </thead>
+          <tbody id="rdv-table">
+            <tr><td colspan="6"><div class="loading-state"><span class="spinner"></span> Chargement…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- OBJECTIFS -->
+    <div class="page" id="page-objectifs">
+      <div class="page-header">
+        <div class="page-title">Mes objectifs 2026</div>
+      </div>
+
+      <div style="display:grid;gap:16px;">
+        <div class="card">
+          <div class="card-title">🏆 Obj. 1 — Rétention : POC → Routine</div>
+          <div style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:12px;">
+            Pas d'objectif cible défini — pas encore de visibilité sur le nombre de POC.<br>
+            À suivre au fil des déploiements.
+          </div>
+          <div class="progress-bar" style="margin-bottom:8px"><div class="progress-fill" style="width:0%;background:var(--green)"></div></div>
+          <div style="font-size:12px;color:var(--text3)">Données à renseigner manuellement dans Notion</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">⭐ Obj. 2 — Satisfaction : impact CSM</div>
+          <div style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:12px;">
+            Question clé : <em>"Votre utilisation de Cleo a-t-elle été impactée positivement par l'accompagnement CSM ?"</em>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+            <div style="flex:1">
+              <div class="obj-label" style="margin-bottom:4px"><span>Score moyen actuel</span><span class="obj-val" id="obj2-score">— / 10</span></div>
+              <div class="progress-bar"><div class="progress-fill" id="obj2-prog" style="width:0%;background:var(--purple)"></div></div>
+            </div>
+          </div>
+          <div style="font-size:12px;color:var(--text2);background:var(--surface2);padding:10px 12px;border-radius:var(--radius-sm);">
+            ≥ 7/10 → 100% atteint &nbsp;|&nbsp; ≥ 5 et &lt; 7 → 50% atteint
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📣 Obj. 3 — Notoriété : ambassadeurs clients</div>
+          <div style="font-size:13px;color:var(--text2);margin-bottom:12px;">
+            Objectif : obtenir <strong>2 utilisateurs actifs</strong> prêts à témoigner (site, congrès…)
+          </div>
+          <div class="obj-label" style="margin-bottom:6px"><span>Ambassadeurs confirmés</span><span class="obj-val" id="obj3-val">0 / 2</span></div>
+          <div class="progress-bar" style="margin-bottom:10px"><div class="progress-fill" id="obj3-prog" style="width:0%;background:var(--pink)"></div></div>
+          <div id="ambassadeurs-list" style="font-size:13px;color:var(--text3)">Aucun ambassadeur confirmé pour l'instant.</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🔗 Obj. 4 — Rétention : labos actifs intéressés</div>
+          <div style="font-size:13px;color:var(--text2);margin-bottom:12px;">
+            Objectif : <strong>90%</strong> des labos actifs continuent à être intéressés par Cleo.
+          </div>
+          <div class="obj-label" style="margin-bottom:6px"><span>Labos actifs retenus</span><span class="obj-val" id="obj4-val">— / —</span></div>
+          <div class="progress-bar"><div class="progress-fill" id="obj4-prog" style="width:0%;background:var(--blue)"></div></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const NOTION_TOKEN = typeof VITE_NOTION_TOKEN !== 'undefined' ? VITE_NOTION_TOKEN : (window.ENV_NOTION_TOKEN || 'TON_TOKEN_ICI');
+const DB_LABOS = '34cbe377ea19806987ead4d4397a5711';
+const DB_PATHO = '34cbe377ea19809aa88bcca53bf68edd';
+const DB_RDV   = '34cbe377ea198031bd0dd2e3af405c88';
+
+const PROXY = 'https://api.allorigins.win/raw?url=';
+
+let data = { labos: [], patho: [], rdv: [] };
+let currentFilter = 'tous';
+
+function notionUrl(dbId) {
+  return PROXY + encodeURIComponent(`https://api.notion.com/v1/databases/${dbId}/query`);
+}
+
+async function queryNotion(dbId) {
+  const res = await fetch(notionUrl(dbId), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${NOTION_TOKEN}`,
+      'Notion-Version': '2022-06-28'
+    },
+    body: JSON.stringify({ page_size: 100 })
+  });
+  if (!res.ok) throw new Error(`Notion API error ${res.status}`);
+  return res.json();
+}
+
+function prop(p, type) {
+  if (!p) return '';
+  if (type === 'title') return p.title?.map(t => t.plain_text).join('') || '';
+  if (type === 'rich_text') return p.rich_text?.map(t => t.plain_text).join('') || '';
+  if (type === 'select') return p.select?.name || '';
+  if (type === 'multi_select') return p.multi_select?.map(s => s.name).join(', ') || '';
+  if (type === 'date') return p.date?.start || '';
+  if (type === 'number') return p.number ?? '';
+  if (type === 'relation') return p.relation?.map(r => r.id) || [];
+  if (type === 'formula') return p.formula?.string || p.formula?.number || '';
+  if (type === 'checkbox') return p.checkbox ?? false;
+  return '';
+}
+
+function getTitle(page) {
+  const props = page.properties;
+  for (const key of Object.keys(props)) {
+    if (props[key].type === 'title') return prop(props[key], 'title');
+  }
+  return '—';
+}
+
+function badgeStatut(s) {
+  const cls = s === 'En cours' ? 'badge-en-cours' : s === 'À venir' ? 'badge-a-venir' : s === 'Standby' ? 'badge-standby' : '';
+  return `<span class="badge ${cls}">${s || '—'}</span>`;
+}
+
+function badgeProduit(p) {
+  const cls = (p || '').includes('Breast') ? 'badge-breast' : 'badge-skin';
+  return p ? `<span class="badge ${cls}">${p}</span>` : '—';
+}
+
+function healthDot(statut) {
+  const cls = statut === 'En cours' ? 'dot-green' : statut === 'À venir' ? 'dot-amber' : statut === 'Standby' ? 'dot-red' : 'dot-gray';
+  return `<span class="health-dot ${cls}"></span>`;
+}
+
+function scoreBar(val) {
+  if (val === '' || val === null || val === undefined) return '<span style="color:var(--text3);font-size:12px">—</span>';
+  const pct = Math.round((val / 10) * 100);
+  return `<div class="score-bar"><div class="score-track"><div class="score-fill" style="width:${pct}%"></div></div><div class="score-num">${val}/10</div></div>`;
+}
+
+function formatDate(d) {
+  if (!d) return '—';
+  try {
+    return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+  } catch(e) { return d; }
+}
+
+function daysFromNow(d) {
+  if (!d) return null;
+  const diff = Math.round((new Date(d) - new Date()) / 86400000);
+  return diff;
+}
+
+function renderLabosTable(tableId, labos) {
+  const tbody = document.getElementById(tableId);
+  if (!labos.length) { tbody.innerHTML = '<tr><td colspan="6"><div class="empty">Aucun labo trouvé dans Notion</div></td></tr>'; return; }
+  tbody.innerHTML = labos.map(l => `
+    <tr>
+      <td style="font-weight:500">${l.nom}</td>
+      <td style="color:var(--text2)">${l.ville || '—'}</td>
+      <td>${badgeProduit(l.produit)}</td>
+      <td style="color:var(--text2);font-size:12px;font-family:'DM Mono',monospace">${formatDate(l.date)}</td>
+      <td>${badgeStatut(l.statut)}</td>
+      <td>${healthDot(l.statut)}</td>
+    </tr>
+  `).join('');
+}
+
+function renderPathoTable(patho) {
+  const tbody = document.getElementById('patho-table');
+  if (!patho.length) { tbody.innerHTML = '<tr><td colspan="7"><div class="empty">Aucun pathologiste trouvé</div></td></tr>'; return; }
+  tbody.innerHTML = patho.map(p => `
+    <tr>
+      <td style="font-weight:500">${p.nom}</td>
+      <td style="color:var(--text2)">${p.labo || '—'}</td>
+      <td>${badgeProduit(p.produit)}</td>
+      <td style="color:var(--text2)">${p.freq || '—'}</td>
+      <td style="color:var(--text2);font-size:12px;font-family:'DM Mono',monospace">${formatDate(p.prochainsRdv)}</td>
+      <td>${scoreBar(p.confiance)}</td>
+      <td>${scoreBar(p.confort)}</td>
+    </tr>
+  `).join('');
+}
+
+function renderRdvTable(rdv) {
+  const tbody = document.getElementById('rdv-table');
+  if (!rdv.length) { tbody.innerHTML = '<tr><td colspan="6"><div class="empty">Aucun point de suivi trouvé</div></td></tr>'; return; }
+  tbody.innerHTML = rdv.map(r => `
+    <tr>
+      <td style="font-weight:500">${r.nom}</td>
+      <td style="color:var(--text2);font-size:12px;font-family:'DM Mono',monospace">${formatDate(r.date)}</td>
+      <td>${r.patho || '—'}</td>
+      <td style="color:var(--text2)">${r.labo || '—'}</td>
+      <td>${scoreBar(r.confiance)}</td>
+      <td>${scoreBar(r.confort)}</td>
+    </tr>
+  `).join('');
+}
+
+function renderRdvCard(rdv) {
+  const upcoming = rdv
+    .filter(r => r.date)
+    .sort((a, b) => new Date(a.date) - new Date(b.date))
+    .slice(0, 4);
+
+  if (!upcoming.length) {
+    document.getElementById('rdv-card').innerHTML = '<div class="empty">Aucun RDV planifié</div>';
+    return;
+  }
+
+  document.getElementById('rdv-card').innerHTML = upcoming.map(r => {
+    const days = daysFromNow(r.date);
+    const daysLabel = days === null ? '' : days < 0 ? 'passé' : days === 0 ? "aujourd'hui" : `dans ${days} j`;
+    const daysColor = days !== null && days >= 0 && days <= 5 ? 'color:var(--amber)' : 'color:var(--text3)';
+    return `
+      <div class="rdv-item">
+        <div>
+          <div class="rdv-name">${r.patho || r.nom}</div>
+          <div class="rdv-sub">${r.labo || '—'}</div>
+        </div>
+        <div class="rdv-date">
+          <div>${formatDate(r.date)}</div>
+          <div class="rdv-days" style="${daysColor}">${daysLabel}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderAlerts(labos, rdv) {
+  const container = document.getElementById('alerts-container');
+  const alerts = [];
+
+  rdv.forEach(r => {
+    const days = daysFromNow(r.date);
+    if (days !== null && days >= 0 && days <= 5) {
+      const patho = r.patho || r.nom;
+      const scoresMissing = (r.confiance === '' || r.confiance === null) && (r.confort === '' || r.confort === null);
+      if (scoresMissing) {
+        alerts.push(`<div class="alert alert-warn">⚠ ${patho} — RDV dans ${days} jour${days > 1 ? 's' : ''}, aucun score renseigné</div>`);
+      } else {
+        alerts.push(`<div class="alert alert-info">📅 ${patho} — RDV dans ${days} jour${days > 1 ? 's' : ''}</div>`);
+      }
+    }
+  });
+
+  const standby = labos.filter(l => l.statut === 'Standby' && !l.date);
+  if (standby.length > 0) {
+    alerts.push(`<div class="alert alert-warn">⚠ ${standby.length} labo${standby.length > 1 ? 's' : ''} en standby sans date de déploiement — risque de perte de contact</div>`);
+  }
+
+  container.innerHTML = alerts.join('') || '';
+}
+
+function renderMetrics(labos, patho) {
+  document.getElementById('m-actifs').textContent = labos.filter(l => l.statut === 'En cours').length;
+  document.getElementById('m-avenir').textContent = labos.filter(l => l.statut === 'À venir').length;
+  document.getElementById('m-standby').textContent = labos.filter(l => l.statut === 'Standby').length;
+  document.getElementById('m-patho').textContent = patho.length;
+}
+
+function renderObjectifs(patho, labos) {
+  const scores = patho.map(p => p.confiance).filter(v => v !== '' && v !== null && v !== undefined);
+  const avgScore = scores.length ? (scores.reduce((a, b) => a + b, 0) / scores.length) : null;
+
+  if (avgScore !== null) {
+    const pct = Math.round((avgScore / 10) * 100);
+    document.getElementById('obj-score').textContent = avgScore.toFixed(1) + ' / 10';
+    document.getElementById('prog-score').style.width = pct + '%';
+    document.getElementById('obj2-score').textContent = avgScore.toFixed(1) + ' / 10';
+    document.getElementById('obj2-prog').style.width = pct + '%';
+  }
+
+  const actifs = labos.filter(l => l.statut === 'En cours').length;
+  document.getElementById('obj4-val').textContent = `${actifs} / ${actifs}`;
+  document.getElementById('obj4-prog').style.width = actifs > 0 ? '100%' : '0%';
+}
+
+function filterLabos(btn, filter) {
+  currentFilter = filter;
+  document.querySelectorAll('#page-labos .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const filtered = filter === 'tous' ? data.labos : data.labos.filter(l => l.statut === filter);
+  renderLabosTable('labos-table-full', filtered);
+}
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(`page-${name}`).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+async function loadAll() {
+  const btn = document.getElementById('refresh-btn');
+  const icon = document.getElementById('refresh-icon');
+  btn.classList.add('loading');
+  icon.innerHTML = '<span class="spinner" style="width:12px;height:12px;border-width:1.5px;margin:0"></span>';
+
+  try {
+    const [labosRes, pathoRes, rdvRes] = await Promise.all([
+      queryNotion(DB_LABOS),
+      queryNotion(DB_PATHO),
+      queryNotion(DB_RDV)
+    ]);
+
+    data.labos = labosRes.results.map(p => {
+      const pr = p.properties;
+      return {
+        nom: getTitle(p),
+        ville: prop(pr['Ville'], 'select') || prop(pr['Ville'], 'rich_text'),
+        produit: prop(pr['Produit Primaa'], 'select') || prop(pr['Produit Primaa'], 'multi_select'),
+        date: prop(pr['Date de déploiement'], 'date'),
+        statut: prop(pr['Statut adoption'], 'select'),
+      };
+    });
+
+    data.patho = pathoRes.results.map(p => {
+      const pr = p.properties;
+      return {
+        nom: getTitle(p),
+        labo: prop(pr['Labos'], 'relation').length ? '(lié)' : prop(pr['Labos'], 'rich_text'),
+        produit: prop(pr['Produit Primaa'], 'select') || prop(pr['Produit Primaa'], 'multi_select'),
+        freq: prop(pr['Fréquence RDV'], 'select') || prop(pr['Fréquence RDV'], 'rich_text'),
+        prochainsRdv: prop(pr['Prochain RDV'], 'date'),
+        confiance: prop(pr['Score confiance actuel'], 'number'),
+        confort: prop(pr['Score confort actuel'], 'number'),
+        ambassadeur: prop(pr['Ambassadeur'], 'checkbox'),
+      };
+    });
+
+    data.rdv = rdvRes.results.map(p => {
+      const pr = p.properties;
+      return {
+        nom: getTitle(p),
+        date: prop(pr['Date de rdv'], 'date'),
+        patho: prop(pr['Pathologistes'], 'relation').length ? '(lié)' : prop(pr['Pathologistes'], 'rich_text'),
+        labo: prop(pr['Labo'], 'relation').length ? '(lié)' : prop(pr['Labo'], 'rich_text'),
+        confiance: prop(pr['Confiance diagnostique'], 'number'),
+        confort: prop(pr['Confort diagnostique'], 'number'),
+      };
+    });
+
+    renderMetrics(data.labos, data.patho);
+    renderAlerts(data.labos, data.rdv);
+    renderLabosTable('labos-table-home', data.labos);
+    renderLabosTable('labos-table-full', data.labos);
+    renderPathoTable(data.patho);
+    renderRdvTable(data.rdv);
+    renderRdvCard(data.rdv);
+    renderObjectifs(data.patho, data.labos);
+
+    const now = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('last-update-label').textContent = `Mis à jour à ${now}`;
+
+  } catch(err) {
+    console.error(err);
+    document.getElementById('alerts-container').innerHTML = `
+      <div class="alert alert-warn">⚠ Impossible de charger les données Notion. Vérifie ton token et les permissions de l'intégration. (${err.message})</div>
+    `;
+  }
+
+  btn.classList.remove('loading');
+  icon.textContent = '↻';
+}
+
+loadAll();
+</script>
+</body>
+</html>
